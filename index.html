@@ -22,6 +22,17 @@
             padding: 10px 20px;
             margin: 10px;
         }
+        #waitingList {
+            margin-top: 20px;
+        }
+        .ticket {
+            font-size: 1.5em;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -29,28 +40,67 @@
     <div id="numberDisplay">0</div>
     <button onclick="incrementNumber()">次の番号</button>
     <button onclick="resetNumber()">リセット</button>
+    <button onclick="addWaiting()">お待ち中の人を追加</button>
+
+    <div id="waitingList">
+        <h2>お待ち中の人</h2>
+        <div id="waitingQueue"></div>
+    </div>
 
     <script>
         let currentNumber = 0;
+        let waitingQueue = [];
 
         function incrementNumber() {
-            currentNumber++;
-            document.getElementById('numberDisplay').innerText = currentNumber;
-            localStorage.setItem('currentNumber', currentNumber);
+            if (waitingQueue.length > 0) {
+                currentNumber = waitingQueue.shift();
+                document.getElementById('numberDisplay').innerText = currentNumber;
+                updateWaitingList();
+                localStorage.setItem('currentNumber', currentNumber);
+                localStorage.setItem('waitingQueue', JSON.stringify(waitingQueue));
+            } else {
+                alert("待ち行列に誰もいません。");
+            }
         }
 
         function resetNumber() {
             currentNumber = 0;
             document.getElementById('numberDisplay').innerText = currentNumber;
+            waitingQueue = [];
+            updateWaitingList();
             localStorage.setItem('currentNumber', currentNumber);
+            localStorage.setItem('waitingQueue', JSON.stringify(waitingQueue));
         }
 
-        // ページが読み込まれたときに、保存されている番号を表示
+        function addWaiting() {
+            const nextNumber = waitingQueue.length > 0 ? Math.max(...waitingQueue) + 1 : 1;
+            waitingQueue.push(nextNumber);
+            updateWaitingList();
+            localStorage.setItem('waitingQueue', JSON.stringify(waitingQueue));
+        }
+
+        function updateWaitingList() {
+            const waitingListElement = document.getElementById('waitingQueue');
+            waitingListElement.innerHTML = "";
+            waitingQueue.forEach(number => {
+                const ticketDiv = document.createElement('div');
+                ticketDiv.className = 'ticket';
+                ticketDiv.innerText = `番号札 ${number}`;
+                waitingListElement.appendChild(ticketDiv);
+            });
+        }
+
+        // ページが読み込まれたときに、保存されている番号と待ち行列を表示
         window.onload = function() {
             const savedNumber = localStorage.getItem('currentNumber');
             if (savedNumber !== null) {
                 currentNumber = parseInt(savedNumber, 10);
                 document.getElementById('numberDisplay').innerText = currentNumber;
+            }
+            const savedQueue = localStorage.getItem('waitingQueue');
+            if (savedQueue !== null) {
+                waitingQueue = JSON.parse(savedQueue);
+                updateWaitingList();
             }
         };
     </script>
