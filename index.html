@@ -47,6 +47,9 @@
         <div id="waitingQueue"></div>
     </div>
 
+    <!-- 呼び出し音の音声ファイル -->
+    <audio id="callSound" src="1.mp3"></audio>
+
     <script>
         let currentNumber = 0;
         let waitingQueue = [];
@@ -58,6 +61,7 @@
                 updateWaitingList();
                 localStorage.setItem('currentNumber', currentNumber);
                 localStorage.setItem('waitingQueue', JSON.stringify(waitingQueue));
+                playCallSound();
             } else {
                 alert("待ち行列に誰もいません。");
             }
@@ -88,6 +92,11 @@
                 ticketDiv.innerText = `番号札 ${number}`;
                 waitingListElement.appendChild(ticketDiv);
             });
+        }
+
+        function playCallSound() {
+            const callSound = document.getElementById('callSound');
+            callSound.play();
         }
 
         // ページが読み込まれたときに、保存されている番号と待ち行列を表示
