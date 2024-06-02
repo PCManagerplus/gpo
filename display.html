@@ -15,11 +15,27 @@
         }
         #numberDisplay {
             font-size: 5em;
+            margin-right: 50px;
+        }
+        #waitingList {
+            font-size: 1.5em;
+        }
+        .ticket {
+            font-size: 1.2em;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin: 5px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <div id="numberDisplay">0</div>
+    <div id="waitingList">
+        <h2>お待ち中の人</h2>
+        <div id="waitingQueue"></div>
+    </div>
 
     <script>
         function updateNumber() {
@@ -29,11 +45,32 @@
             }
         }
 
-        // 定期的に番号を更新
-        setInterval(updateNumber, 1000);
+        function updateWaitingList() {
+            const waitingListElement = document.getElementById('waitingQueue');
+            const savedQueue = localStorage.getItem('waitingQueue');
+            if (savedQueue !== null) {
+                const waitingQueue = JSON.parse(savedQueue);
+                waitingListElement.innerHTML = "";
+                waitingQueue.forEach(number => {
+                    const ticketDiv = document.createElement('div');
+                    ticketDiv.className = 'ticket';
+                    ticketDiv.innerText = `番号札 ${number}`;
+                    waitingListElement.appendChild(ticketDiv);
+                });
+            }
+        }
 
-        // 初回読み込み時にも番号を更新
-        window.onload = updateNumber;
+        // 定期的に番号と待ち行列を更新
+        setInterval(() => {
+            updateNumber();
+            updateWaitingList();
+        }, 1000);
+
+        // 初回読み込み時にも番号と待ち行列を更新
+        window.onload = () => {
+            updateNumber();
+            updateWaitingList();
+        };
     </script>
 </body>
 </html>
